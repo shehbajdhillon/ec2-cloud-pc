@@ -20,20 +20,20 @@ const SEVEN_ZIP_URL = 'https://7-zip.org/a/7z2409-x64.msi';
 
 
 
-const EC2_KEYPAIR_NAME = 'CHANGE_ME';
-const VOLUME_SIZE_GIB = 200;
-const OPEN_PORTS = [8443];
+const EC2_KEYPAIR_NAME = 'windows-machine';
+const VOLUME_SIZE_GIB = 550;
+const OPEN_PORTS = [8443, ...Array.from({ length: 48010 - 47984 + 1 }, (_, i) => i + 47984)]; // DCV and Sunshine/Moonlight ports
 const ALLOW_INBOUND_CIDR = '0.0.0.0/0';
-const ACCOUNT_ID = 'CHANGE_ME';
-const REGION = 'us-east-1';
+const ACCOUNT_ID = '851725633425';
+const REGION = 'us-west-2';
 
-new G4DNStack(app, 'CloudGamingsOnG4DN', {
+new G4DNStack(app, 'CloudDesktopOnG4DN', {
   niceDCVDisplayDriverUrl: NICE_DCV_DISPLAY_DRIVER_URL,
   niceDCVServerUrl: NICE_DCV_SERVER_URL,
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
-  instanceSize: ec2.InstanceSize.XLARGE,
+  instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
   openPorts: OPEN_PORTS,
@@ -44,17 +44,17 @@ new G4DNStack(app, 'CloudGamingsOnG4DN', {
     region: REGION,
   },
   tags: {
-    project: 'CloudGamingOnG4DN',
+    project: 'CloudDesktopOnG4DN',
   },
 });
 
-new G5Stack(app, 'CloudGamingOnG5', {
+new G5Stack(app, 'CloudDesktopOnG5', {
   niceDCVDisplayDriverUrl: NICE_DCV_DISPLAY_DRIVER_URL,
   niceDCVServerUrl: NICE_DCV_SERVER_URL,
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
-  instanceSize: ec2.InstanceSize.XLARGE,
+  instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
   openPorts: OPEN_PORTS,
@@ -65,7 +65,7 @@ new G5Stack(app, 'CloudGamingOnG5', {
     region: REGION,
   },
   tags: {
-    project: 'CloudGamingsOnG5',
+    project: 'CloudDesktopOnG5',
   },
 });
 
@@ -75,7 +75,7 @@ new G6Stack(app, 'CloudGamingOnG6', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
-  instanceSize: ec2.InstanceSize.XLARGE,
+  instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
   openPorts: OPEN_PORTS,
@@ -96,7 +96,7 @@ new G6EStack(app, 'CloudGamingOnG6E', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
-  instanceSize: ec2.InstanceSize.XLARGE,
+  instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
   openPorts: OPEN_PORTS,
@@ -133,13 +133,13 @@ new GR6Stack(app, 'CloudGamingOnGR6', {
 });
 
 
-new G4ADStack(app, 'CloudGamingsOnG4AD', {
+new G4ADStack(app, 'CloudDesktopOnG4AD', {
   niceDCVDisplayDriverUrl: NICE_DCV_DISPLAY_DRIVER_URL,
   niceDCVServerUrl: NICE_DCV_SERVER_URL,
   chromeUrl: CHROME_URL,
   sevenZipUrl: SEVEN_ZIP_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
-  instanceSize: ec2.InstanceSize.XLARGE,
+  instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
   openPorts: OPEN_PORTS,
@@ -150,6 +150,6 @@ new G4ADStack(app, 'CloudGamingsOnG4AD', {
     region: REGION,
   },
   tags: {
-    project: 'CloudGamingsOnG4AD',
+    project: 'CloudDesktopOnG4AD',
   },
 });
