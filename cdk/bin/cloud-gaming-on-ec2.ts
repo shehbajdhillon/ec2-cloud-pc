@@ -17,6 +17,7 @@ const NICE_DCV_SERVER_URL = 'https://d1uj6qtbmh3dt5.cloudfront.net/nice-dcv-serv
 const GRID_SW_CERT_URL = 'https://nvidia-gaming.s3.amazonaws.com/GridSwCert-Archive/GridSwCertWindows_2024_02_22.cert';
 const CHROME_URL = 'https://dl.google.com/tag/s/appname=Google%20Chrome&needsadmin=true&ap=x64-stable-statsdef_0&brand=GCEA/dl/chrome/install/googlechromestandaloneenterprise64.msi';
 const SEVEN_ZIP_URL = 'https://7-zip.org/a/7z2409-x64.msi';
+const SUNSHINE_INSTALLER_URL = 'https://github.com/LizardByte/Sunshine/releases/latest/download/Sunshine-Windows-AMD64-installer.exe';
 
 
 
@@ -33,6 +34,7 @@ new G4DNStack(app, 'CloudDesktopOnG4DN', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
+  sunshineInstallerUrl: SUNSHINE_INSTALLER_URL,
   instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
@@ -54,6 +56,7 @@ new G5Stack(app, 'CloudDesktopOnG5', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
+  sunshineInstallerUrl: SUNSHINE_INSTALLER_URL,
   instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
@@ -75,6 +78,7 @@ new G6Stack(app, 'CloudGamingOnG6', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
+  sunshineInstallerUrl: SUNSHINE_INSTALLER_URL,
   instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
@@ -96,6 +100,7 @@ new G6EStack(app, 'CloudGamingOnG6E', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
+  sunshineInstallerUrl: SUNSHINE_INSTALLER_URL,
   instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
@@ -117,6 +122,7 @@ new GR6Stack(app, 'CloudGamingOnGR6', {
   sevenZipUrl: SEVEN_ZIP_URL,
   chromeUrl: CHROME_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
+  sunshineInstallerUrl: SUNSHINE_INSTALLER_URL,
   instanceSize: ec2.InstanceSize.XLARGE4, // Minimum size
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,
@@ -139,6 +145,7 @@ new G4ADStack(app, 'CloudDesktopOnG4AD', {
   chromeUrl: CHROME_URL,
   sevenZipUrl: SEVEN_ZIP_URL,
   gridSwCertUrl: GRID_SW_CERT_URL,
+  sunshineInstallerUrl: SUNSHINE_INSTALLER_URL,
   instanceSize: ec2.InstanceSize.XLARGE2,
   ec2KeyName: EC2_KEYPAIR_NAME,
   volumeSizeGiB: VOLUME_SIZE_GIB,

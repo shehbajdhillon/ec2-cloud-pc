@@ -105,6 +105,78 @@ Stack completion usually takes `8-15` minutes.
 
 Follow the instructions in the associated blog post [Use Amazon EC2 for cost-efficient cloud gaming with pay-as-you-go pricing](https://aws.amazon.com/blogs/compute/use-amazon-ec2-for-cost-efficient-cloud-gaming-with-pay-as-you-go-pricing/).
 
+#### 7. Finish Sunshine + Moonlight setup (one time, after first deploy)
+
+Sunshine is installed and running as a Windows service by cloud-init, but the first-run credentials and Moonlight pairing must be done interactively. DCV stays as the management/recovery path; Moonlight becomes the streaming path.
+
+##### 7a. Verify Sunshine installed cleanly
+
+Connect via the **DCV client** at `https://<public-ip>:8443` (username `Administrator`, password decrypted from `windows-machine.pem` via `aws ec2 get-password-data`). Then in PowerShell:
+
+```powershell
+Test-Path "C:\Program Files\Sunshine\sunshine.exe"
+Get-Service SunshineService | Format-Table Name, Status, StartType
+```
+
+Expected: `True` and `SunshineService Running Automatic`.
+
+##### 7b. Create Sunshine admin credentials
+
+Inside the DCV session, open Chrome (installed by cloud-init) and go to `https://localhost:47990`. Accept the self-signed cert warning (**Advanced → Proceed to localhost**) and create the Sunshine admin username/password. These are separate from the Windows Administrator account — you'll use them only for the Sunshine Web UI.
+
+##### 7c. Pair Moonlight
+
+1. On your local machine, install Moonlight from https://moonlight-stream.org.
+2. In Moonlight: **Add Host** → enter the instance's Elastic IP → it displays a 4-digit PIN.
+3. In Sunshine's Web UI (`https://localhost:47990`): **PIN** tab → enter the PIN → paired.
+4. Back in Moonlight, click the host → launch **Desktop** → you should get a working stream.
+
+To disconnect a Moonlight session: **Ctrl + Alt + Shift + Q** (on macOS: **Ctrl + Option + Shift + Q**).
+
+##### 7d. Recommended stream settings
+
+In Moonlight on your local machine (gear icon → Settings):
+
+| Setting | Recommendation |
+|---|---|
+| Resolution | Match your local display (1920×1080 / 2560×1440 / 3840×2160) |
+| Frame rate | 60 fps |
+| Bitrate | 40-80 Mbps for 1080p60, 80-120 Mbps for 1440p60, 150+ Mbps for 4K60 |
+| V-Sync | On |
+| HDR | Off (NVIDIA gaming drivers on EC2 don't support HDR over Sunshine) |
+
+Inside the streamed session, also bump the Windows desktop resolution to match (right-click desktop → **Display settings** → Display resolution). Sunshine captures whatever Windows is rendering — if Windows is at 1024×768 you'll see an upscaled, blurry 1024×768 in Moonlight regardless of client settings. The DCV virtual display driver supports up to 4K.
+
+##### 7e. Session behavior — DCV and Moonlight together
+
+- DCV's "automatic console session" (configured by the registry tweaks in `cdk/lib/base.ts`) gives Sunshine a desktop to capture. You can **disconnect** the DCV client and Moonlight keeps working — but **don't sign out of Windows** (Start → Sign out), that destroys the session and Sunshine loses its capture target.
+- Rebooting or stop+start of the instance ends the console session. After it comes back up, you'll need to connect via DCV once to re-establish the session before Moonlight will stream — unless you enable AutoAdminLogon (next step).
+
+##### 7f. (Optional) Streaming after reboot without DCV
+
+To make Moonlight work immediately after every reboot without DCVing in first, enable Administrator auto-login. In an elevated PowerShell inside the instance:
+
+```powershell
+$pw = '<your-Administrator-password>'
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v AutoAdminLogon /t REG_SZ /d 1 /f
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultUserName /t REG_SZ /d Administrator /f
+reg add "HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" /v DefaultPassword /t REG_SZ /d $pw /f
+Restart-Computer
+```
+
+Caveat: this stores the password in plaintext in the registry, readable by anyone with admin / VHD access. For a hardened version use Sysinternals [`Autologon.exe`](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon), which stores it in the LSA secret store instead.
+
+##### 7g. Stop the instance when idle
+
+A running g6.2xlarge is ~$1.35/hr in `us-west-2`. Stop it when you're not using it:
+
+```
+aws ec2 stop-instances --instance-ids <instance-id> --region us-west-2
+aws ec2 start-instances --instance-ids <instance-id> --region us-west-2
+```
+
+The Elastic IP persists across stop/start at no extra charge while attached.
+
 ## Useful CLI commands
 
 List EC2 key pairs

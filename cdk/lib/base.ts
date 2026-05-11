@@ -15,6 +15,7 @@ export interface BaseConfig extends cdk.StackProps {
   sevenZipUrl: string,
   chromeUrl: string,
   gridSwCertUrl: string,
+  sunshineInstallerUrl: string,
   openPorts: number[];
   allowInboundCidr: string;
   associateElasticIp: boolean;
@@ -94,8 +95,8 @@ export abstract class BaseEc2Stack extends cdk.Stack {
       init: ec2.CloudFormationInit.fromConfigSets({
         configSets: {
           // Seperate configSets and specific order depending on EC2 Instance Type
-          NVIDIA: ['helpersPreinstall', 'nvidia', 'nvidiadcv', 'reboot'],
-          AMD: ['helpersPreinstall', 'amd', 'amddcv', 'reboot'],
+          NVIDIA: ['helpersPreinstall', 'nvidia', 'nvidiadcv', 'sunshine', 'reboot'],
+          AMD: ['helpersPreinstall', 'amd', 'amddcv', 'sunshine', 'reboot'],
         },
         configs: {
           helpersPreinstall: new ec2.InitConfig([
@@ -125,6 +126,10 @@ export abstract class BaseEc2Stack extends cdk.Stack {
             ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\display" /v frame-queue-weights /t REG_DWORD /d 851 /f', { key: '94-Add-Reg', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
             ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\session-management\\automatic-console-session" /v owner /t REG_SZ /d Administrator /f', { key: '95-Add-Reg', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
             ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\connectivity" /v enable-quic-frontend /t REG_DWORD /d 1 /f', { key: '96-Add-Reg', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+          ]),
+          sunshine: new ec2.InitConfig([
+            ec2.InitFile.fromUrl('C:\\Users\\Administrator\\Desktop\\Sunshine-installer.exe', this.props.sunshineInstallerUrl),
+            ec2.InitCommand.shellCommand('"C:\\Users\\Administrator\\Desktop\\Sunshine-installer.exe" /S', { key: '1-Install-Sunshine', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(60)) }),
           ]),
           nvidia: new ec2.InitConfig([
             // Download GRID Certificate.
