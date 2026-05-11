@@ -95,8 +95,8 @@ export abstract class BaseEc2Stack extends cdk.Stack {
       init: ec2.CloudFormationInit.fromConfigSets({
         configSets: {
           // Seperate configSets and specific order depending on EC2 Instance Type
-          NVIDIA: ['helpersPreinstall', 'nvidia', 'nvidiadcv', 'sunshine', 'reboot'],
-          AMD: ['helpersPreinstall', 'amd', 'amddcv', 'sunshine', 'reboot'],
+          NVIDIA: ['helpersPreinstall', 'nvidia', 'nvidiadcv', 'windowsLockTweaks', 'sunshine', 'reboot'],
+          AMD: ['helpersPreinstall', 'amd', 'amddcv', 'windowsLockTweaks', 'sunshine', 'reboot'],
         },
         configs: {
           helpersPreinstall: new ec2.InitConfig([
@@ -126,6 +126,20 @@ export abstract class BaseEc2Stack extends cdk.Stack {
             ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\display" /v frame-queue-weights /t REG_DWORD /d 851 /f', { key: '94-Add-Reg', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
             ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\session-management\\automatic-console-session" /v owner /t REG_SZ /d Administrator /f', { key: '95-Add-Reg', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
             ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\connectivity" /v enable-quic-frontend /t REG_DWORD /d 1 /f', { key: '96-Add-Reg', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+          ]),
+          windowsLockTweaks: new ec2.InitConfig([
+            // Stop DCV from locking the OS when the client disconnects (the actual fix for lock-on-disconnect).
+            ec2.InitCommand.shellCommand('reg add "HKEY_USERS\\S-1-5-18\\Software\\GSettings\\com\\nicesoftware\\dcv\\security" /v os-auto-lock /t REG_DWORD /d 0 /f', { key: '1-DCV-NoOsAutoLock', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            // Drop the "Press Ctrl+Alt+Del to unlock" prompt — go straight to password field.
+            ec2.InitCommand.shellCommand('reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v DisableCAD /t REG_DWORD /d 1 /f', { key: '2-DisableCAD', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            // Disable Windows machine inactivity auto-lock policy.
+            ec2.InitCommand.shellCommand('reg add "HKLM\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System" /v InactivityTimeoutSecs /t REG_DWORD /d 0 /f', { key: '3-InactivityTimeout', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            // Disable screen saver in the Default User profile so first-time logins (Administrator) inherit it.
+            ec2.InitCommand.shellCommand('reg load HKU\\DefaultUser C:\\Users\\Default\\NTUSER.DAT', { key: '4a-LoadDefaultHive', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            ec2.InitCommand.shellCommand('reg add "HKU\\DefaultUser\\Control Panel\\Desktop" /v ScreenSaveActive /t REG_SZ /d 0 /f', { key: '4b-ScreenSaveActive', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            ec2.InitCommand.shellCommand('reg add "HKU\\DefaultUser\\Control Panel\\Desktop" /v ScreenSaverIsSecure /t REG_SZ /d 0 /f', { key: '4c-ScreenSaverIsSecure', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            ec2.InitCommand.shellCommand('reg add "HKU\\DefaultUser\\Control Panel\\Desktop" /v ScreenSaveTimeOut /t REG_SZ /d 0 /f', { key: '4d-ScreenSaveTimeOut', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
+            ec2.InitCommand.shellCommand('powershell.exe -Command "[GC]::Collect(); Start-Sleep -Seconds 2; reg unload HKU\\DefaultUser"', { key: '4e-UnloadDefaultHive', waitAfterCompletion: ec2.InitCommandWaitDuration.of(cdk.Duration.seconds(0)) }),
           ]),
           sunshine: new ec2.InitConfig([
             ec2.InitFile.fromUrl('C:\\Users\\Administrator\\Desktop\\Sunshine-installer.exe', this.props.sunshineInstallerUrl),
